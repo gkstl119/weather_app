@@ -2,8 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import 'package:lottie/lottie.dart';
-
 class ForecastCard extends StatelessWidget {
   ForecastCard(
       {super.key,

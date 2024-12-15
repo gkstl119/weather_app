@@ -7,6 +7,7 @@ import 'package:weather_app/widgets/forecast_card.dart';
 import 'package:weather_app/widgets/header.dart';
 import 'package:weather_app/widgets/info_card.dart';
 import 'package:weather_app/widgets/daily_forecast_card.dart';
+import 'package:weather_app/Pages/community_insights_page.dart';
 
 class WeatherHomePage extends StatefulWidget {
   const WeatherHomePage({super.key});
@@ -96,85 +97,111 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
                 descriptionIMG: loadingIcon,
                 state_name: weather.state,
                 temp: weather.temp,
-                onCityChange: updateCity, // Pass the function to handle search
+                onCityChange: updateCity,
               ),
             ),
-            body: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: const Alignment(-1.5, 8),
-                  end: const Alignment(-1.5, -0.5),
-                  colors: [Colors.white, defaultColor],
+            body: Column(
+              children: [
+                // Weather Content
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: const Alignment(-1.5, 8),
+                        end: const Alignment(-1.5, -0.5),
+                        colors: [Colors.white, defaultColor],
+                      ),
+                    ),
+                    child: CustomScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      slivers: <Widget>[
+                        // Hourly Forecast
+                        SliverToBoxAdapter(
+                          child: Container(
+                            height: 200,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: weather.forecast.length,
+                              itemBuilder: (context, index) => ForecastCard(
+                                hour: weather.forecast[index]['time']
+                                    .toString()
+                                    .split(' ')[1],
+                                averageTemp: weather.forecast[index]['temp_f'],
+                                description: weather.forecast[index]
+                                    ['condition']['text'],
+                                descriptionIMG: weather.forecast[index]
+                                        ['condition']['icon']
+                                    .toString()
+                                    .replaceAll('//', 'http://'),
+                              ),
+                            ),
+                          ),
+                        ),
+                        // Today's Weather Info
+                        SliverToBoxAdapter(
+                          child: InformartionsCard(
+                            humidity: weather.humidity,
+                            uvIndex: weather.uvIndex,
+                            wind: weather.wind,
+                          ),
+                        ),
+                        // Extended Outlook Header
+                        SliverToBoxAdapter(
+                          child: Container(
+                            margin: const EdgeInsets.only(top: 20),
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: const Text(
+                              "Extended Outlook: Next 7 Days",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                        // Extended Forecast
+                        SliverToBoxAdapter(
+                          child: SizedBox(
+                            height: 300,
+                            child: ListView.builder(
+                              itemCount: weather.dailyForecast.length,
+                              itemBuilder: (context, index) {
+                                final daily = weather.dailyForecast[index];
+                                return DailyForecastCard(
+                                  day: daily['date'],
+                                  maxTemp: daily['day']['maxtemp_f'],
+                                  minTemp: daily['day']['mintemp_f'],
+                                  description: daily['day']['condition']
+                                      ['text'],
+                                  iconUrl: daily['day']['condition']['icon']
+                                      .toString()
+                                      .replaceAll('//', 'http://'),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-              child: CustomScrollView(
-                physics: const BouncingScrollPhysics(),
-                slivers: <Widget>[
-                  SliverToBoxAdapter(
-                    child: Container(
-                      height: 200,
-                      width: MediaQuery.of(context).size.width,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: weather.forecast.length,
-                        itemBuilder: (context, index) => ForecastCard(
-                          hour: weather.forecast[index]['time']
-                              .toString()
-                              .split(' ')[1],
-                          averageTemp: weather.forecast[index]['temp_f'],
-                          description: weather.forecast[index]['condition']
-                              ['text'],
-                          descriptionIMG: weather.forecast[index]['condition']
-                                  ['icon']
-                              .toString()
-                              .replaceAll('//', 'http://'),
+                // Community Insights Button
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CommunityInsightsPage(),
                         ),
-                      ),
-                    ),
+                      );
+                    },
+                    child: const Text('Community Insights'),
                   ),
-                  SliverToBoxAdapter(
-                    child: InformartionsCard(
-                      humidity: weather.humidity,
-                      uvIndex: weather.uvIndex,
-                      wind: weather.wind,
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Container(
-                      margin: const EdgeInsets.only(top: 20),
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: const Text(
-                        "Extended Outlook: Next 7 Days",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 300,
-                      child: ListView.builder(
-                        itemCount: weather.dailyForecast.length,
-                        itemBuilder: (context, index) {
-                          final daily = weather.dailyForecast[index];
-                          return DailyForecastCard(
-                            day: daily['date'],
-                            maxTemp: daily['day']['maxtemp_f'],
-                            minTemp: daily['day']['mintemp_f'],
-                            description: daily['day']['condition']['text'],
-                            iconUrl: daily['day']['condition']['icon']
-                                .toString()
-                                .replaceAll('//', 'http://'),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           );
   }

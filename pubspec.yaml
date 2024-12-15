@@ -31,7 +31,8 @@ dependencies:
   flutter:
     sdk: flutter
   http: any
-  lottie: ^2.3.2
+  firebase_core: ^2.19.0
+  cloud_firestore: ^4.12.0
 
 
   # The following adds the Cupertino Icons font to your application.
